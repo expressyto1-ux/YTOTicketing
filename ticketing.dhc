@@ -1,0 +1,30 @@
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
+<HtmlCompiler>
+  <App>
+    <ID>{8469D026-7D69-4D2D-9C7F-4E70477CB17A}</ID>
+    <Name>I.T. Ticketing System</Name>
+    <IndexHtml>index.html</IndexHtml>
+    <CompanyName>YTO Express Philippines I.T. Ticketing System</CompanyName>
+    <FileDescription>I.T. Ticketing System by Von Erick De Torres</FileDescription>
+    <FileVersion>2.0</FileVersion>
+    <LegalCopyright>I.T. Ticketing System by Von Erick De Torres</LegalCopyright>
+    <LegalTrademarks>I.T. Ticketing System by Von Erick De Torres</LegalTrademarks>
+    <OriginalFileName>I.T. Ticketing System by Von Erick De Torres</OriginalFileName>
+    <ProductVersion>2.0</ProductVersion>
+    <Top>-3</Top>
+    <Left>-3</Left>
+    <Width>1926</Width>
+    <Height>1038</Height>
+    <WindowBorder>1</WindowBorder>
+    <WindowState>1</WindowState>
+    <IcoPath>System_Logo.ico</IcoPath>
+    <OutputWin32>0</OutputWin32>
+    <Generator>
+      <Name>DecSoft HTML Compiler</Name>
+      <Website>https://www.decsoftutils.com/</Website>
+      <Orders>https://www.decsoftutils.com/store/</Orders>
+      <EMail>info@decsoftutils.com</EMail>
+      <Copyright>©2025 DecSoft HTML Compiler. All rights reserved.</Copyright>
+    </Generator>
+  </App>
+</HtmlCompiler>

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>My Profile | IT Support Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --bg: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            /* New light gradient bg */
+            --dark: #1e293b;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --gray-dark: #334155;
+            --surface: #ffffff;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg) fixed;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            transition: var(--transition);
+            color: var(--dark);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        /* Header Section */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .profile-details {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-avatar {
+            position: relative;
+            display: inline-block;
+        }
+
+        #profilePic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid var(--surface);
+            object-fit: cover;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+            background: #fff;
+        }
+
+        .profile-details:hover #profilePic {
+            transform: scale(1.05);
+        }
+
+        .profile-info h1 {
+            font-size: 26px;
+            margin: 0;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .profile-info p {
+            font-size: 16px;
+            color: var(--gray);
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+        }
+
+        .stats-grid-header {
+            display: flex;
+            gap: 16px;
+        }
+
+        #updateProfileLink {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        #updateProfileLink:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Main Content Grid */
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+
+        @media (max-width: 1024px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                align-items: flex-start;
+            }
+
+            .stats-grid-header {
+                width: 100%;
+                justify-content: space-around;
+            }
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .info-card h2 {
+            margin: 0 0 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-weight: 600;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 14px 0;
+            font-size: 15px;
+        }
+
+        .info-item i {
+            font-size: 16px;
+            color: var(--primary);
+            margin-top: 4px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            word-break: break-word;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--surface);
+            padding: 16px;
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card i {
+            font-size: 24px;
+            color: var(--primary);
+            background: var(--primary-light);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        #openTicketsCard i {
+            color: var(--warning);
+            background: #fff7ed;
+        }
+
+        #closedTicketsCard i {
+            color: var(--success);
+            background: #ecfdf5;
+        }
+
+        .stat-card .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* Chart container to constrain height */
+        .chart-wrapper {
+            position: relative;
+            height: 150px;
+            width: 100%;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+
+        @media (max-width: 768px) {
+            .chart-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Spinner */
+        .spinner-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .spinner {
+            width: 55px;
+            height: 55px;
+            border: 5px solid rgba(0, 0, 0, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            color: var(--dark);
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-left: 5px solid var(--success);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            color: var(--dark);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 26px;
+            color: #333;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close-btn:hover {
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .modal-body {
+            padding: 24px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-field label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .form-field input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            background: var(--light);
+            color: var(--dark);
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .form-field input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-field input[readonly] {
+            background: #e5e7eb;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .modal-footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            background: var(--surface);
+            padding: 16px 24px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray);
+            color: #fff;
+        }
+
+        /* Regions styling */
+        .regions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .region-tag {
+            background: var(--primary-light);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="spinner-overlay" id="spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <div class="container">
+        <!-- Header Section -->
+        <header class="profile-header">
+            <div class="profile-details">
+                <div class="profile-avatar">
+                    <img id="profilePic" src="https://i.imgur.com/8bXVn5d.png" alt="Profile Picture">
+                </div>
+                <div class="profile-info">
+                    <h1 id="fullName"></h1>
+                    <p id="username"></p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="stats-grid-header">
+                    <div class="stat-card" id="assignedTicketsCard">
+                        <i class="fas fa-tasks"></i>
+                        <div>
+                            <div class="stat-label">Assigned</div>
+                            <div class="stat-value" id="assignedTickets">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="openTicketsCard">
+                        <i class="fas fa-folder-open"></i>
+                        <div>
+                            <div class="stat-label">Open</div>
+                            <div class="stat-value" id="openTickets">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="closedTicketsCard">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <div class="stat-label">Closed</div>
+                            <div class="stat-value" id="closedTickets">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a href="#" onclick="openUpdateModal()" id="updateProfileLink">
+                        <i class="fas fa-edit"></i> Update Profile
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="profile-content">
+            <div class="info-card">
+                <h2><i class="fas fa-user-circle"></i> Account Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-id-badge"></i>
+                        <div>
+                            <div class="info-label">Username</div>
+                            <div class="info-value" id="usernameValue"></div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value" id="emailValue">N/A</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <div class="info-label">Contact Number</div>
+                            <div class="info-value" id="contactValue">N/A</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-globe-asia"></i>
+                        <div>
+                            <div class="info-label">Region Handle</div>
+                            <div class="info-value" id="regionHandleValue"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="charts-column" style="display: flex; flex-direction: column; gap: 28px;">
+                <div class="info-card">
+                    <h2><i class="fas fa-chart-pie"></i> Ticket Status Breakdown</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="ticketStatusChart"></canvas>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h2><i class="fas fa-tools"></i> Repair Outcome Analysis</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="repairOutcomeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Profile Modal -->
+    <div id="updateProfileModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Update Your Profile</h2>
+                <button class="modal-close-btn" onclick="closeUpdateModal()">&times;</button>
+            </div>
+            <form id="updateProfileForm">
+                <div class="modal-body">
+                    <div class="form-field">
+                        <label for="updateFullName">Full Name</label>
+                        <input type="text" id="updateFullName" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="updateUsername">Username (cannot be changed)</label>
+                        <input type="text" id="updateUsername" readonly>
+                    </div>
+                    <div class="form-field">
+                        <label for="updatePassword">New Password (leave blank to keep current)</label>
+                        <input type="password" id="updatePassword" placeholder="Enter new password">
+                    </div>
+                    <div class="form-field">
+                        <label for="updateContact">Contact Number</label>
+                        <input type="tel" id="updateContact" placeholder="e.g., 09123456789">
+                    </div>
+                    <div class="form-field">
+                        <label for="updateEmail">Email Address</label>
+                        <input type="email" id="updateEmail" placeholder="e.g., your.name@example.com">
+                    </div>
+                    <div class="form-field">
+                        <label for="updateProfilePic">Update Profile Picture</label>
+                        <input type="file" id="updateProfilePic" accept="image/*">
+                    </div>
+                    <fieldset id="updateRegionsFieldset"
+                        style="border: 1px solid var(--gray-light); border-radius: 8px; padding: 12px; margin-top: 10px;">
+                        <legend style="font-weight: 600; padding: 0 8px; color: var(--gray);">Assign Regions</legend>
+                        <div id="updateRegionCheckboxes"
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; font-size: 14px;">
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="Batangas Operation"> Batangas</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="Cavite Operation"> Cavite</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="Laguna Operation"> Laguna</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="CARMONA Operation"> CARMONA</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="Bulacan Operation"> Bulacan</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="Manila Operation"> Manila</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="Quezon City Operation"> Quezon City</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="NCR South Operation"> NCR South</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="NCR North Operation"> NCR North</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="CAMANA Operation"> CAMANA</label>
+                            <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox"
+                                    name="regions" value="Pampanga Operation"> Pampanga</label>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeUpdateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // All JavaScript functionality remains exactly the same
+        const SESSION_KEY = 'it_session';
+        const USERS_API_URL = "https://script.google.com/macros/s/AKfycbwTiDXSQ9sHFnsNGZudsFVH3bKqGeAOHTSCQpfqGXT-FYp2zmYCcS0xYW3zJmmsgAg/exec";
+        const TICKETS_API_URL = "https://script.google.com/macros/s/AKfycbwTiDXSQ9sHFnsNGZudsFVH3bKqGeAOHTSCQpfqGXT-FYp2zmYCcS0xYW3zJmmsgAg/exec";
+
+        let ticketStatusChart, repairOutcomeChart;
+        let userTickets = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('updateProfileForm').addEventListener('submit', handleProfileUpdate);
+            loadUserProfile();
+        });
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.style.borderLeftColor = `var(--${type})`;
+            const icon = toast.querySelector('i');
+            icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        async function loadUserProfile() {
+            const spinner = document.getElementById('spinner');
+            const sessionData = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+            if (!sessionData) {
+                spinner.innerHTML = "<h2 style='color:white;'>Error: No user session found. Please log in again.</h2>";
+                return;
+            }
+
+            try {
+                // Fetch ticket data
+                const response = await fetch(TICKETS_API_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const allTickets = await response.json();
+
+                document.getElementById('fullName').textContent = sessionData.fullName || 'User';
+                document.getElementById('username').textContent = `IT Personnel - ${sessionData.userType || 'User'}`;
+                document.getElementById('usernameValue').textContent = `@${sessionData.username}`;
+                const regionValueEl = document.getElementById('regionHandleValue');
+                document.getElementById('emailValue').textContent = sessionData.email || 'Not Set';
+                document.getElementById('contactValue').textContent = sessionData.contactNumber || 'Not Set';
+                const regions = sessionData.regions || [];
+                if (regions.length > 0) {
+                    regionValueEl.innerHTML = regions.map(r => `<span class="region-tag">${r}</span>`).join(' ');
+                    // Adjust parent style for flex-wrap
+                    regionValueEl.style.display = 'flex';
+                    regionValueEl.style.flexWrap = 'wrap';
+                    regionValueEl.style.gap = '6px';
+                } else {
+                    regionValueEl.textContent = "N/A";
+                }
+                if (sessionData.profilePicUrl) {
+                    const img = document.getElementById('profilePic');
+                    let url = sessionData.profilePicUrl;
+
+                    if (url.includes('drive.google.com')) {
+                        const fileId = url.split(/[\/|=]/).pop();
+                        if (fileId) {
+                            url = `https://drive.google.com/thumbnail?id=${fileId}`;
+                        }
+                    }
+                    img.src = url;
+
+                    img.onerror = function () {
+                        this.src = "https://i.imgur.com/8bXVn5d.png";
+                    };
+                } else {
+                    document.getElementById('profilePic').src = "https://i.imgur.com/8bXVn5d.png";
+                }
+
+                userTickets = allTickets.filter(ticket => ticket.colJ === sessionData.fullName);
+                const assignedCount = userTickets.length;
+                const closedCount = userTickets.filter(t => (t.colI || '').toLowerCase() === 'closed').length;
+                const openCount = assignedCount - closedCount;
+                const completedRepairs = userTickets.filter(t => (t.colL || '').toLowerCase() === 'completed').length;
+                const notFixed = userTickets.filter(t => (t.colL || '').toLowerCase() === 'not fixed').length;
+
+                document.getElementById('assignedTickets').textContent = assignedCount;
+                document.getElementById('openTickets').textContent = openCount;
+                document.getElementById('closedTickets').textContent = closedCount;
+
+                createOrUpdateCharts(openCount, closedCount, completedRepairs, notFixed);
+
+                spinner.style.display = 'none';
+            } catch (error) {
+                console.error("Failed to load user profile:", error);
+                spinner.innerHTML = `<h2 style='color:white;'>Error loading profile: ${error.message}</h2>`;
+            }
+        }
+
+        function createOrUpdateCharts(openCount, closedCount, completedRepairs, notFixed) {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#1e293b',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Ticket Status Chart (Doughnut)
+            const statusCtx = document.getElementById('ticketStatusChart').getContext('2d');
+            const statusData = {
+                labels: ['Open', 'Closed'],
+                datasets: [{
+                    data: [openCount, closedCount],
+                    backgroundColor: ['#f59e0b', '#10b981'],
+                    borderColor: '#fff',
+                    borderWidth: 4,
+                }]
+            };
+
+            if (ticketStatusChart) {
+                ticketStatusChart.data = statusData;
+                ticketStatusChart.update();
+            } else {
+                ticketStatusChart = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: statusData,
+                    options: {
+                        ...commonOptions,
+                        cutout: '70%',
+                    }
+                });
+            }
+
+            // Repair Outcome Chart (Doughnut)
+            const repairCtx = document.getElementById('repairOutcomeChart').getContext('2d');
+            const repairData = {
+                labels: ['Completed', 'Not Fixed'],
+                datasets: [{
+                    data: [completedRepairs, notFixed],
+                    backgroundColor: ['#4f46e5', '#ef4444'],
+                    borderColor: '#fff',
+                    borderWidth: 4,
+                }]
+            };
+
+            if (repairOutcomeChart) {
+                repairOutcomeChart.data = repairData;
+                repairOutcomeChart.update();
+            } else {
+                repairOutcomeChart = new Chart(repairCtx, {
+                    type: 'doughnut',
+                    data: repairData,
+                    options: {
+                        ...commonOptions,
+                        cutout: '70%',
+                    }
+                });
+            }
+        }
+
+        function openUpdateModal() {
+            const sessionData = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+            if (!sessionData) {
+                showToast('Session expired. Please log in again.');
+                return;
+            }
+
+            document.getElementById('updateFullName').value = sessionData.fullName || '';
+            document.getElementById('updateUsername').value = sessionData.username || '';
+            document.getElementById('updateContact').value = sessionData.contactNumber || '';
+            document.getElementById('updateEmail').value = sessionData.email || '';
+            document.getElementById('updatePassword').value = '';
+
+            const regionFieldset = document.getElementById('updateRegionsFieldset');
+            const regionCheckboxes = document.querySelectorAll('#updateProfileModal input[name="regions"]');
+
+            // Only allow Admins to edit regions.
+            const isAdmin = sessionData.userType === 'Admin';
+            regionFieldset.disabled = !isAdmin;
+            regionFieldset.style.opacity = isAdmin ? '1' : '0.6';
+            regionFieldset.title = isAdmin ? '' : 'Only Admins can change region assignments.';
+
+            // Populate region checkboxes
+            regionCheckboxes.forEach(checkbox => {
+                checkbox.checked = sessionData.regions && sessionData.regions.includes(checkbox.value);
+            });
+
+            document.getElementById('updateProfileModal').style.display = 'flex';
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateProfileModal').style.display = 'none';
+        }
+
+        async function handleProfileUpdate(event) {
+            event.preventDefault();
+            const submitBtn = document.querySelector('#updateProfileForm button[type="submit"]');
+            const cancelBtn = document.querySelector('#updateProfileModal .btn-secondary');
+            const originalBtnText = submitBtn.innerHTML;
+
+            // Disable both buttons during submission
+            submitBtn.disabled = true;
+            cancelBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
+
+            const sessionData = JSON.parse(localStorage.getItem(SESSION_KEY));
+            if (!sessionData) return;
+            const formData = new FormData();
+            formData.append('action', 'updateUser');
+            formData.append('username', sessionData.username);
+
+            formData.append('fullName', document.getElementById('updateFullName').value);
+            formData.append('contactNumber', document.getElementById('updateContact').value);
+            formData.append('email', document.getElementById('updateEmail').value);
+
+            // Handle regions and userType based on user's role
+            if (sessionData.userType === 'Admin') {
+                // If user is Admin, collect regions from checkboxes and determine new userType
+                const regions = Array.from(document.querySelectorAll('#updateProfileModal input[name="regions"]:checked')).map(cb => cb.value);
+                formData.append('regions', regions.join(","));
+
+                const allRegionCheckboxes = document.querySelectorAll('#updateProfileModal input[name="regions"]');
+                formData.append('userType', regions.length === allRegionCheckboxes.length ? 'Admin' : 'ITStaff');
+            } else {
+                // If user is not Admin, retain their existing regions and userType
+                const existingRegions = sessionData.regions || [];
+                formData.append('regions', existingRegions.join(","));
+                formData.append('userType', sessionData.userType);
+            }
+
+            const newPassword = document.getElementById('updatePassword').value;
+            if (newPassword) {
+                formData.append('password', newPassword);
+            }
+
+            const profilePicFile = document.getElementById('updateProfilePic').files[0];
+            if (profilePicFile) {
+                try {
+                    const base64String = await fileToBase64(profilePicFile);
+                    formData.append('profilePic', base64String);
+                } catch {
+                    showToast('Error reading image file.');
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch(USERS_API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Profile updated successfully!', 'success');
+
+                    // Update session storage
+                    const updatedSessionData = { ...sessionData, ...result.updatedData };
+                    localStorage.setItem(SESSION_KEY, JSON.stringify(updatedSessionData));
+
+                    // Inform parent window about the update
+                    window.parent.postMessage({ type: 'SESSION_UPDATED' }, '*');
+
+                    closeUpdateModal();
+                    loadUserProfile(); // Reload profile data on the page
+                } else {
+                    throw new Error(result.message || 'Failed to update profile.');
+                }
+            } catch (error) {
+                showToast(`Update failed: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                cancelBtn.disabled = false; // Re-enable cancel button
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+    </script>
+</body>
+
+</html>

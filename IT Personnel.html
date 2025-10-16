@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>YTO Express Philippines - IT Department</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-light: #eef2ff;
+            --primary: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #fff;
+            --brand: #6d28d9;
+            --brand-2: #db2777;
+            --brand-3: #22c55e;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --radius: 20px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 32px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0;
+            background: transparent;
+            color: var(--text);
+            border-radius: var(--radius);
+            box-shadow: none;
+            margin-bottom: 32px;
+            position: relative;
+            top: auto;
+            z-index: auto;
+            border: none;
+        }
+
+        .header .brand,
+        .header h1 {
+            color: var(--brand);
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header-center h1 {
+            margin: 0 0 4px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-center {
+            text-align: center;
+        }
+
+        .add-personnel-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: none;
+            /* Hidden by default */
+        }
+
+        .add-personnel-btn:hover {
+            background: #4338ca;
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.05);
+        }
+
+        /* New: User display in header */
+        .header-right {
+            text-align: right;
+            display: flex;
+            /* New: for alignment */
+            align-items: center;
+            /* New: for alignment */
+            gap: 20px;
+            /* New: for spacing */
+        }
+
+        .user-type {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            opacity: 1;
+        }
+
+        /* New container for the add button */
+        .add-personnel-container {
+            max-width: 1400px;
+            margin: -15px auto 20px;
+            text-align: right;
+            padding: 0 10px;
+        }
+
+        .username {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Search bar */
+        .search-container {
+            margin: 20px auto 40px;
+            max-width: 750px;
+            /* Wider search bar */
+            position: relative;
+        }
+
+        .search-add-container .search-container {
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 16px 24px 16px 50px;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            font-size: 16px;
+            background: #fff;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+        }
+
+        #searchInput:focus {
+            border-color: var(--brand);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.15);
+        }
+
+        .search-container::before {
+            content: "\f002";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 28px;
+        }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid #e2e8f0;
+        }
+
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--brand);
+        }
+
+        .card img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-light);
+            box-shadow: var(--shadow);
+            margin-bottom: 12px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .card-header-info {
+            flex-grow: 1;
+        }
+
+        .name {
+            font-weight: 700;
+            font-size: 18px;
+            margin: 0 0 4px;
+            color: var(--text);
+        }
+
+        .user-type-card {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Chevron indicator */
+        .chevron {
+            font-size: 16px;
+            color: var(--muted);
+            transition: transform 0.4s ease, color 0.3s ease;
+        }
+
+        .card.active .chevron {
+            transform: rotate(180deg);
+            color: var(--brand);
+        }
+
+        /* Expandable details with smooth animation */
+        .details {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: max-height 0.5s ease, opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .card.active .details {
+            max-height: 500px;
+            margin-top: 16px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 6px 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .details strong {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .badge-container {
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 4px 6px;
+        }
+
+        .badge.assigned {
+            background: rgba(109, 40, 217, 0.1);
+            color: var(--brand);
+        }
+
+        .badge.closed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--brand-3);
+        }
+
+        #message {
+            margin-top: 20px;
+            color: var(--muted);
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 10;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        /* Edit Button */
+        .edit-btn {
+            position: absolute;
+            top: 12px;
+            right: 50px;
+            /* Next to the delete button */
+            background: #dbeafe;
+            color: #3b82f6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn:hover {
+            background: #2563eb;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        /* Spinner overlay */
+        .spinner-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            display: none;
+            z-index: 20;
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 4px solid #ccc;
+            border-top-color: var(--brand);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Fade-out effect when deleting */
+        .deleting {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        /* === Add/Update Modal === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--text);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--muted-light, #e5e7eb);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--brand);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close-btn:hover {
+            color: #ef4444;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-field label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: var(--text);
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .form-field input:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--muted-light, #e5e7eb);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-btn.primary {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        .modal-btn.primary:hover {
+            background: #5a1db9;
+        }
+
+        .modal-btn.secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-btn.secondary:hover {
+            background: #d1d5db;
+        }
+
+        #profilePicPreview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--brand-2);
+            cursor: pointer;
+        }
+
+        #regionCheckboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        #regionCheckboxes label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 22px;
+            border-radius: 8px;
+            background: #333;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            transition: bottom 0.4s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toast.show {
+            bottom: 20px;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <i class="fas fa-network-wired"></i>
+                <span class="brand">IT Portal</span>
+            </div>
+            <div class="header-center">
+                <h1>YTO Express PH</h1>
+                <h1>Personnel Management</h1>
+            </div>
+            <div class="header-right">
+                <!-- User info will be populated here -->
+                <div>
+                    <span id="userTypeDisplay" class="user-type"></span>
+                    <span id="usernameDisplay" class="username"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Add Personnel Button Container -->
+        <div class="add-personnel-container">
+            <button id="addPersonnelBtn" class="add-personnel-btn" onclick="openAddPersonnelModal()">
+                <i class="fas fa-plus"></i> Add Personnel
+            </button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search by name, username, or region...">
+        </div>
+
+        <!-- Grid -->
+        <div class="grid" id="personnelGrid"></div>
+        <div id="message"></div>
+    </div>
+
+    <!-- Add Personnel Modal -->
+    <div id="addPersonnelModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Add New IT Personnel</h2>
+                <button class="modal-close-btn" onclick="closeAddPersonnelModal()"
+                    style="background:transparent; border:none; color: #333; font-size: 24px; padding:0 12px; cursor:pointer; line-height: 1;">&times;</button>
+            </div>
+            <form id="addPersonnelForm">
+                <div class="modal-body">
+                    <div style="text-align: center;">
+                        <img id="profilePicPreview" src="https://i.imgur.com/8bXVn5d.png" alt="Profile Preview"
+                            onclick="document.getElementById('regProfilePic').click();">
+                        <input type="file" id="regProfilePic" accept="image/*" style="display: none;">
+                        <p style="font-size: 12px; opacity: 0.7; margin-top: 6px;">Click image to upload</p>
+                    </div>
+                    <div class="form-field">
+                        <label for="regFullName">Full Name</label>
+                        <input type="text" id="regFullName" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="regUsername">Username</label>
+                        <input type="text" id="regUsername" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="regPassword">Password</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="regContact">Contact Number (Optional)</label>
+                        <input type="tel" id="regContact" placeholder="e.g., 09123456789">
+                    </div>
+                    <div class="form-field">
+                        <label for="regEmail">Email Address (Optional)</label>
+                        <input type="email" id="regEmail" placeholder="e.g., your.name@example.com">
+                    </div>
+                    <fieldset style="border: 1px solid #ddd; border-radius: 8px; padding: 12px;">
+                        <legend style="font-weight: 600; padding: 0 8px; color: var(--muted);">Assign Regions</legend>
+                        <div id="regionCheckboxes">
+                            <label><input type="checkbox" name="regions" value="Batangas Operation"> Batangas</label>
+                            <label><input type="checkbox" name="regions" value="Cavite Operation"> Cavite</label>
+                            <label><input type="checkbox" name="regions" value="Laguna Operation"> Laguna</label>
+                            <label><input type="checkbox" name="regions" value="CARMONA Operation"> CARMONA</label>
+                            <label><input type="checkbox" name="regions" value="Bulacan Operation"> Bulacan</label>
+                            <label><input type="checkbox" name="regions" value="Manila Operation"> Manila</label>
+                            <label><input type="checkbox" name="regions" value="Quezon City Operation"> Quezon
+                                City</label>
+                            <label><input type="checkbox" name="regions" value="NCR South Operation"> NCR South</label>
+                            <label><input type="checkbox" name="regions" value="NCR North Operation"> NCR North</label>
+                            <label><input type="checkbox" name="regions" value="CAMANA Operation"> CAMANA</label>
+                            <label><input type="checkbox" name="regions" value="Pampanga Operation"> Pampanga</label>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="modal-btn secondary" onclick="closeAddPersonnelModal()">Cancel</button>
+                    <button type="submit" class="modal-btn primary">
+                        <i class="fas fa-save"></i> Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- JS -->
+    <script>
+        const USERS_API_URL = "https://script.google.com/macros/s/AKfycbwTiDXSQ9sHFnsNGZudsFVH3bKqGeAOHTSCQpfqGXT-FYp2zmYCcS0xYW3zJmmsgAg/exec";
+        const TICKETS_API_URL = "https://script.google.com/macros/s/AKfycbwTiDXSQ9sHFnsNGZudsFVH3bKqGeAOHTSCQpfqGXT-FYp2zmYCcS0xYW3zJmmsgAg/exec";
+        let allUsers = [];
+        let allTickets = [];
+
+        // Modal elements
+        const addPersonnelModal = document.getElementById('addPersonnelModal');
+        const addPersonnelForm = document.getElementById('addPersonnelForm');
+        const regProfilePicInput = document.getElementById('regProfilePic');
+        const modalTitle = addPersonnelModal.querySelector('.modal-header h2');
+        const profilePicPreview = document.getElementById('profilePicPreview');
+
+        function openAddPersonnelModal() {
+            addPersonnelModal.style.display = 'flex';
+        }
+
+        function closeAddPersonnelModal() {
+            // Reset to "Add" mode
+            modalTitle.textContent = 'Add New IT Personnel';
+            addPersonnelForm.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Create User';
+            document.getElementById('regUsername').readOnly = false;
+            addPersonnelForm.removeAttribute('data-mode');
+            addPersonnelModal.style.display = 'none';
+            addPersonnelForm.reset();
+            profilePicPreview.src = 'https://i.imgur.com/8bXVn5d.png';
+        }
+
+        async function loadUsers() {
+            const grid = document.getElementById("personnelGrid");
+            const message = document.getElementById("message");
+            message.textContent = "Loading personnel...";
+
+            try {
+                const [userRes, ticketRes] = await Promise.all([
+                    fetch(`${USERS_API_URL}?action=getUsers`),
+                    fetch(TICKETS_API_URL)
+                ]);
+
+                const result = await userRes.json();
+                const ticketResult = await ticketRes.json();
+
+                if (!result.success || !Array.isArray(result.data)) {
+                    throw new Error("Invalid data format from API.");
+                }
+
+                if (Array.isArray(ticketResult)) {
+                    allTickets = ticketResult;
+                }
+
+                allUsers = result.data.filter(user => user.fullName && user.fullName !== "Administrator");
+                displayUsers(allUsers);
+
+                document.getElementById('searchInput').addEventListener('input', handleSearch);
+
+            } catch (err) {
+                console.error("Error loading users:", err);
+                message.textContent = "⚠️ Failed to load data. Please try again.";
+            }
+        }
+
+        function displayUsers(users) {
+            const grid = document.getElementById("personnelGrid");
+            const message = document.getElementById("message");
+            grid.innerHTML = '';
+
+            if (users.length === 0) {
+                message.textContent = "No users found.";
+                return;
+            }
+            message.textContent = '';
+
+            // Get user type from session to conditionally show delete button
+            const sessionData = JSON.parse(localStorage.getItem('it_session') || 'null');
+            const isAdmin = sessionData && sessionData.userType === 'Admin';
+
+            users.forEach(user => {
+                if (!user.fullName) return; // Skip users with no name
+                const card = document.createElement("div");
+                card.className = "card";
+
+                let profilePicSrc = user.profilePicUrl || 'https://i.imgur.com/8bXVn5d.png';
+                if (profilePicSrc.includes('drive.google.com')) {
+                    const fileId = profilePicSrc.split(/[\/|=]/).pop();
+                    if (fileId) profilePicSrc = `https://drive.google.com/thumbnail?id=${fileId}`;
+                }
+
+                const assignedTickets = allTickets.filter(ticket => (ticket.colJ || '').trim() === (user.fullName || '').trim());
+                const totalAssigned = assignedTickets.length;
+                const totalClosed = assignedTickets.filter(ticket => (ticket.colI || '').toLowerCase() === 'closed').length;
+
+                // --- NEW: Calculate Average Acknowledge Time ---
+                let totalAckTimeMs = 0;
+                let ackCount = 0;
+                assignedTickets.forEach(ticket => {
+                    if (ticket.colB && ticket.colK) { // colB is submission, colK is acknowledge
+                        const submissionTime = new Date(ticket.colB);
+                        const ackTime = new Date(ticket.colK);
+                        if (!isNaN(submissionTime) && !isNaN(ackTime)) {
+                            totalAckTimeMs += ackTime - submissionTime;
+                            ackCount++;
+                        }
+                    }
+                });
+
+                let avgAckTimeHtml = 'N/A';
+                if (ackCount > 0) {
+                    const avgMs = totalAckTimeMs / ackCount;
+                    const minutes = Math.floor((avgMs / (1000 * 60)) % 60);
+                    const hours = Math.floor((avgMs / (1000 * 60 * 60)) % 24);
+                    const days = Math.floor(avgMs / (1000 * 60 * 60 * 24));
+
+                    let parts = [];
+                    if (days > 0) parts.push(`${days}d`);
+                    if (hours > 0) parts.push(`${hours}h`);
+                    if (minutes > 0) parts.push(`${minutes}m`);
+                    if (parts.length === 0 && avgMs > 0) {
+                        const seconds = Math.floor(avgMs / 1000);
+                        parts.push(`${seconds}s`);
+                    }
+
+                    avgAckTimeHtml = parts.join(' ') || 'Instant';
+                }
+                // --- END: Calculation ---
+
+                const adminButtonsHtml = isAdmin ? `
+                    <button class="edit-btn" title="Edit User" onclick='openUpdatePersonnelModal(${JSON.stringify(user)}, event)'><i class="fas fa-pencil-alt"></i></button>
+                    <button class="delete-btn" title="Delete User" onclick="deleteUser('${user.username}', event, this)">&times;</button>
+                ` : '';
+
+                card.innerHTML = `
+          ${adminButtonsHtml}
+          <div class="spinner-overlay"><div class="spinner"></div></div>
+          <img src="${profilePicSrc}" alt="${user.fullName}" onerror="this.onerror=null;this.src='https://i.imgur.com/8bXVn5d.png';"> <div class="user-type-card">${user.userType || 'IT Staff'}</div>
+          <div class="name">${user.fullName}</div>
+          <div class="chevron"><i class="fas fa-chevron-down"></i></div>
+          <div class="details">
+            <div class="details-grid">
+              <strong>Username:</strong> <span>${user.username}</span>
+              <strong>Regions:</strong> <span>${user.regions && user.regions.length > 0 ? user.regions.join('<br>') : 'N/A'}</span>
+              <strong>Email:</strong> <span>${user.email || 'N/A'}</span>
+              <strong>Contact:</strong> <span>${user.contactNumber || 'N/A'}</span>
+            </div>
+            <div class="badge-container">
+              <span class="badge assigned">Assigned: ${totalAssigned}</span>
+              <span class="badge closed">Closed: ${totalClosed}</span>
+              <span class="badge time" title="Average time to acknowledge a ticket">Avg. Ack: ${avgAckTimeHtml}</span>
+            </div>
+          </div>
+        `;
+
+                card.addEventListener('click', () => {
+                    const wasActive = card.classList.contains('active');
+                    document.querySelectorAll('.card.active').forEach(activeCard => {
+                        activeCard.classList.remove('active');
+                    });
+                    if (!wasActive) {
+                        card.classList.add('active');
+                    }
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function openUpdatePersonnelModal(user, event) {
+            event.stopPropagation();
+
+            // Set modal to "update" mode
+            addPersonnelForm.setAttribute('data-mode', 'update');
+            modalTitle.textContent = 'Update IT Personnel';
+            addPersonnelForm.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Update Account';
+
+            // Populate form fields
+            document.getElementById('regFullName').value = user.fullName || '';
+            document.getElementById('regUsername').value = user.username || '';
+            document.getElementById('regUsername').readOnly = true; // Username cannot be changed
+            document.getElementById('regPassword').value = ''; // Clear password field
+            document.getElementById('regPassword').placeholder = 'Leave blank to keep current password';
+            document.getElementById('regContact').value = user.contactNumber || '';
+            document.getElementById('regEmail').value = user.email || '';
+
+            // Set profile picture preview
+            let profilePicSrc = user.profilePicUrl || 'https://i.imgur.com/8bXVn5d.png';
+            if (profilePicSrc.includes('drive.google.com')) {
+                const fileId = profilePicSrc.split(/[\/|=]/).pop();
+                if (fileId) profilePicSrc = `https://drive.google.com/thumbnail?id=${fileId}`;
+            }
+            profilePicPreview.src = profilePicSrc;
+
+            // Check the appropriate region checkboxes
+            const regionCheckboxes = document.querySelectorAll('#addPersonnelModal input[name="regions"]');
+            regionCheckboxes.forEach(checkbox => {
+                checkbox.checked = user.regions && user.regions.includes(checkbox.value);
+            });
+
+            // Open the modal
+            openAddPersonnelModal();
+        }
+
+        function handleSearch(event) {
+            const searchTerm = event.target.value.toLowerCase();
+            const filteredUsers = allUsers.filter(user => {
+                const regions = user.regions ? user.regions.join(' ').toLowerCase() : '';
+                return (user.fullName || '').toLowerCase().includes(searchTerm) ||
+                    (user.username || '').toLowerCase().includes(searchTerm) ||
+                    regions.includes(searchTerm);
+            });
+            displayUsers(filteredUsers);
+        }
+
+        async function deleteUser(username, event, btn) {
+            event.stopPropagation();
+            const card = btn.closest('.card');
+            const spinner = card.querySelector('.spinner-overlay');
+            spinner.style.display = 'flex';
+
+            if (!confirm(`Are you sure you want to permanently delete IT Personnel: ${username}? This action cannot be undone.`)) {
+                spinner.style.display = 'none';
+                return;
+            }
+
+            const message = document.getElementById("message");
+            message.textContent = `Deleting ${username}...`;
+
+            // Get the current admin's username from session
+            const sessionData = JSON.parse(localStorage.getItem('it_session') || 'null');
+            const requestedBy = sessionData ? sessionData.username : '';
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'deleteUser');
+                formData.append('username', username);
+                formData.append('requestedBy', requestedBy); // Send the admin's username for verification
+
+                const response = await fetch(USERS_API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    message.textContent = `${username} has been deleted successfully.`;
+                    card.classList.add('deleting');
+                    setTimeout(() => card.remove(), 400); // remove after fade-out
+
+                    // Notify parent window to refresh
+                    window.parent.postMessage({ type: 'USER_DELETED' }, '*');
+                } else {
+                    throw new Error(result.message || 'An unknown error occurred.');
+                }
+            } catch (err) {
+                console.error("Error deleting user:", err);
+                message.textContent = `⚠️ Error: ${err.message}`;
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        function loadSessionInfo() {
+            const sessionData = JSON.parse(localStorage.getItem('it_session') || 'null');
+            if (sessionData) {
+                const userTypeEl = document.getElementById('userTypeDisplay');
+                const usernameEl = document.getElementById('usernameDisplay');
+                const addBtn = document.getElementById('addPersonnelBtn');
+
+                if (userTypeEl) userTypeEl.textContent = `IT Personnel - ${sessionData.userType || 'User'}`;
+                if (usernameEl) usernameEl.textContent = sessionData.username || 'Guest';
+
+                // Show Add button only for Admins
+                if (addBtn && sessionData.userType === 'Admin') {
+                    addBtn.style.display = 'inline-flex';
+                }
+            }
+        }
+
+        // Handle Add Personnel Form Submission
+        addPersonnelForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = addPersonnelForm.querySelector('button[type="submit"]');
+            const isUpdateMode = addPersonnelForm.getAttribute('data-mode') === 'update';
+            const action = isUpdateMode ? 'updateUser' : 'registerUser';
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isUpdateMode ? 'Updating' : 'Creating'}...`;
+
+            const fullName = document.getElementById('regFullName').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value; // Don't trim password
+            const contact = document.getElementById('regContact').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const regions = Array.from(document.querySelectorAll('#addPersonnelModal input[name="regions"]:checked')).map(cb => cb.value);
+
+            if (!fullName || !username || (!password && !isUpdateMode) || regions.length === 0) {
+                showToast('Please fill all fields and select at least one region.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = isUpdateMode ? '<i class="fas fa-save"></i> Update Account' : '<i class="fas fa-save"></i> Create User';
+                return;
+            }
+
+            // Determine userType based on region selection for both create and update
+            const allRegionCheckboxes = document.querySelectorAll('#addPersonnelModal input[name="regions"]');
+            const userType = regions.length === allRegionCheckboxes.length ? 'Admin' : 'ITStaff';
+            const formData = new FormData();
+            formData.append('action', action);
+            formData.append('userType', userType); // Always send the userType
+            formData.append('fullName', fullName);
+            formData.append('username', username);
+            formData.append('regions', regions.join(","));
+            if (password) { // Only send password if it's not blank
+                formData.append('password', password);
+            }
+            formData.append('contactNumber', contact);
+            formData.append('email', email);
+
+            if (regProfilePicInput.files.length > 0) {
+                try {
+                    const base64 = await fileToBase64(regProfilePicInput.files[0]);
+                    formData.append('profilePic', base64);
+                } catch (err) {
+                    showToast('Error reading profile picture.', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = isUpdateMode ? '<i class="fas fa-save"></i> Update Account' : '<i class="fas fa-save"></i> Create User';
+                    return;
+                }
+            }
+
+            try {
+                const resp = await fetch(USERS_API_URL, { method: 'POST', body: formData });
+                const data = await resp.json();
+
+                if (data && data.success) {
+                    // Notify parent window that personnel data has changed
+                    window.parent.postMessage({ type: 'PERSONNEL_MODIFIED' }, '*');
+
+                    showToast(`Account ${isUpdateMode ? 'updated' : 'created'} successfully!`, 'success');
+                    closeAddPersonnelModal();
+
+                    // If the updated user is the current user, update their session
+                    if (isUpdateMode) {
+                        const sessionData = JSON.parse(localStorage.getItem('it_session') || 'null');
+                        if (sessionData && sessionData.username === username && data.updatedData) {
+                            const updatedSession = { ...sessionData, ...data.updatedData };
+                            localStorage.setItem('it_session', JSON.stringify(updatedSession));
+                            // Optionally, inform other tabs about the change
+                            window.parent.postMessage({ type: 'SESSION_UPDATED' }, '*');
+                        }
+                    }
+
+                    await loadUsers(); // Refresh the list
+                } else {
+                    showToast(data?.message || `Failed to ${isUpdateMode ? 'update' : 'create'} account.`, 'error');
+                }
+            } catch (err) {
+                showToast(`Error ${isUpdateMode ? 'updating' : 'creating'} account. Please try again.`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = isUpdateMode ? '<i class="fas fa-save"></i> Update Account' : '<i class="fas fa-save"></i> Create User';
+            }
+        });
+
+        regProfilePicInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => { profilePicPreview.src = e.target.result; }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSessionInfo();
+            loadUsers();
+        });
+    </script>
+</body>
+
+</html>

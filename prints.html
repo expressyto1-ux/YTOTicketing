@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>IT Device General Assessment Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            position: relative;
+            /* Needed for watermark stacking */
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://imgur.com/ykZQl3d.png');
+            background-repeat: no-repeat;
+            background-position: center 150px;
+            background-size: 60%;
+            opacity: 0.08;
+            z-index: -1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header img {
+            height: 100px;
+        }
+
+        .header h1 {
+            margin: 5px 0;
+            font-size: 18px;
+            text-transform: uppercase;
+            text-decoration: underline;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        td,
+        th {
+            border: 1px solid #000;
+            padding: 6px;
+            vertical-align: top;
+        }
+
+        .section-title {
+            font-weight: bold;
+            width: 180px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .signature-block {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-line {
+            margin-top: 40px;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.1);
+        }
+
+        /* New Print Button Styles */
+        .print-actions {
+            position: fixed;
+            /* Position relative to the viewport */
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            /* Ensure it's on top */
+        }
+
+        .print-btn {
+            background: #198754;
+            /* Green for export */
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            /* Smaller padding */
+            font-size: 14px;
+            /* Smaller font */
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .print-btn:hover {
+            background: #146c43;
+            /* Darker green on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        @media print {
+            .print-actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <img src="https://imgur.com/ykZQl3d.png" alt="YTO Logo">
+        <h1>IT Device General Assessment Report</h1>
+    </div>
+
+    <!-- Top Info -->
+    <table>
+        <tr>
+            <td><b>Asset Code:</b> <span id="assetCode"></span></td>
+            <td><b>Branch:</b> <span id="branch"></span></td>
+        </tr>
+        <tr>
+            <td><b>Ticket ID:</b> <span id="ticketId"></span></td>
+            <td><b>Date:</b> <span id="date"></span></td>
+        </tr>
+    </table>
+
+    <!-- Item Description -->
+    <table>
+        <tr>
+            <td class="section-title">Item Description:</td>
+            <td id="deviceType" style="font-weight: bold;"></td>
+        </tr>
+        <tr>
+            <td class="section-title">Problem Description:</td>
+            <td id="problem"></td>
+        </tr>
+        <tr>
+            <td class="section-title">Cause of Issue:</td>
+            <td id="cause">(Human-induced? Yes / No / Others)</td>
+        </tr>
+        <tr>
+            <td class="section-title">Repair Status:</td>
+            <td id="repairStatusResult" style="font-weight: bold;"></td>
+        </tr>
+        <tr>
+            <td class="section-title">Recommendation / Solution:</td>
+            <td id="solution" style="height:80px;"></td>
+        </tr>
+        <tr>
+            <td class="section-title">Photo:</td>
+            <td id="photo"></td>
+        </tr>
+    </table>
+
+    <!-- Footer / Signatures -->
+    <div class="footer">
+        <div class="signature-block">
+            <div>Checked and Repaired By:</div>
+            <div class="signature-line" id="personnelSignature">IT Personnel<br>YTO Express Philippines
+                Technology
+                Group Corporation</div>
+        </div>
+        <div class="signature-block">
+            <div>Confirmed / Received By:</div>
+            <div class="signature-line" id="reporterSignature">Name<br>Date</div>
+        </div>
+    </div>
+
+    <!-- Print Button -->
+    <div class="print-actions">
+        <button class="print-btn" onclick="window.print()">🖨️ Print / ExportPDF</button>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwTiDXSQ9sHFnsNGZudsFVH3bKqGeAOHTSCQpfqGXT-FYp2zmYCcS0xYW3zJmmsgAg/exec";
+
+        // Get ticket from query parameter
+        // This script seems to expect a different API response than what is provided in the main dashboard.
+        const urlParams = new URLSearchParams(window.location.search);
+        const ticketId = urlParams.get("ticket");
+
+        if (ticketId) {
+            // Fetch all tickets to find the specific one by its ID
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(allTickets => {
+                    const ticketData = allTickets.find(t => t.colA === ticketId);
+
+                    if (!ticketData) {
+                        alert("Error: Ticket not found.");
+                        return;
+                    }
+
+                    // Populate the fields based on the correct column mapping
+                    document.getElementById("ticketId").textContent = ticketData.colA || "";
+                    document.getElementById("branch").textContent = ticketData.colD || "";
+                    document.getElementById("assetCode").textContent = ticketData.colQ || "";
+                    document.getElementById("deviceType").textContent = ticketData.colF || "N/A";
+                    document.getElementById("problem").textContent = ticketData.colG || "N/A";
+                    document.getElementById("solution").textContent = ticketData.colP || ""; // colP is Remarks/Solution
+                    document.getElementById("date").textContent = ticketData.colB ? new Date(ticketData.colB).toLocaleDateString() : new Date().toLocaleDateString();
+
+                    // Handle Photo Thumbnail
+                    const photoUrl = ticketData.colH;
+                    if (photoUrl && photoUrl.includes('drive.google.com')) {
+                        const fileIdMatch = photoUrl.match(/[\/d\/]([a-zA-Z0-9_-]{25,})|id=([a-zA-Z0-9_-]{25,})/);
+                        if (fileIdMatch) {
+                            const fileId = fileIdMatch[1] || fileIdMatch[2];
+                            const thumbnailUrl = `https://drive.google.com/thumbnail?id=${fileId}`;
+                            document.getElementById("photo").innerHTML = `<img src="${thumbnailUrl}" style="max-height: 250px; max-width: 100%; border-radius: 8px;">`;
+                        }
+                    }
+
+                    // Repair Status
+                    const repairStatus = (ticketData.colL || "").toLowerCase();
+                    const repairStatusEl = document.getElementById("repairStatusResult");
+                    if (repairStatus.includes("completed")) {
+                        repairStatusEl.textContent = "Completed";
+                    } else if (repairStatus.includes("not-fixed") || repairStatus.includes("not fixed")) {
+                        repairStatusEl.textContent = "Not Fixed";
+                    } else {
+                        repairStatusEl.textContent = ticketData.colL || "N/A";
+                    }
+
+                    // IT Personnel Signature
+                    const personnelName = ticketData.colJ;
+                    if (personnelName) {
+                        document.getElementById("personnelSignature").innerHTML = `${personnelName}<br>IT Technical & System Support<br>YTO Express Philippines Technology Group Corporation`;
+                    }
+
+                    // Confirmed / Received By Signature
+                    const reporterName = ticketData.colE;
+                    if (reporterName) {
+                        document.getElementById("reporterSignature").innerHTML = `${reporterName}<br>Date`;
+                    }
+                })
+                .catch(err => alert("Error fetching ticket: " + err));
+        } else {
+            alert("No Ticket ID provided in URL");
+        }
+    </script>
+</body>
+
+</html>

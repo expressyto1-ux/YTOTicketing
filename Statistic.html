@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Statistics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #7209b7;
+            --text-dark: #1e293b;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2) fixed;
+            color: var(--text-dark);
+            transition: var(--transition);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        header h1 {
+            color: var(--secondary);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 24px;
+        }
+
+        .dashboard-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .info-card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .info-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            font-size: 14px;
+            transition: var(--transition);
+            color: var(--dark);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: var(--gray);
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-info {
+                flex-direction: column;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                min-width: 100%;
+            }
+
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h1>Ticket Statistics Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="fetchStats()">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+            </div>
+        </header>
+        <div class="dashboard-info">
+            <div class="info-card">
+                <h3>Total Tickets</h3>
+                <div class="value" id="totalTickets">0</div>
+            </div>
+            <div class="info-card">
+                <h3>Resolved Tickets</h3>
+                <div class="value" id="resolvedTickets">0</div>
+            </div>
+            <div class="info-card">
+                <h3>Still Open Tickets</h3>
+                <div class="value" id="stillOpenTickets">0</div>
+            </div>
+            <div class="info-card">
+                <h3>Active IT Personnel</h3>
+                <div class="value" id="activeIT">0</div>
+            </div>
+        </div>
+        <div class="controls">
+            <div class="filter-group">
+                <label for="dateFrom"><i class="fas fa-calendar-alt"></i> From Date</label>
+                <input type="date" id="dateFrom">
+            </div>
+            <div class="filter-group">
+                <label for="dateTo"><i class="fas fa-calendar-alt"></i> To Date</label>
+                <input type="date" id="dateTo">
+            </div>
+            <div class="filter-group">
+                <label for="regionFilter"><i class="fas fa-globe"></i> Region</label>
+                <select id="regionFilter">
+                    <option value="all">All Regions</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="itFilter"><i class="fas fa-user-cog"></i> IT Personnel</label>
+                <select id="itFilter">
+                    <option value="all">All IT Personnel</option>
+                </select>
+                <button class="btn btn-outline" onClick="resetDateFilter()">
+                    <i class="fas fa-redo"></i> Reset Filters
+                </button>
+            </div>
+        </div>
+        <div class="chart-grid">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Tickets per IT Personnel</h3>
+                    <div class="chart-actions">
+                    </div>
+                </div>
+                <canvas id="itChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Tickets per Region</h3>
+                    <div class="chart-actions">
+                    </div>
+                </div>
+                <canvas id="regionChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Tickets per Branch</h3>
+                    <div class="chart-actions">
+                    </div>
+                </div>
+                <canvas id="branchChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">Tickets per Device Type</h3>
+                    <div class="chart-actions">
+                    </div>
+                </div>
+                <canvas id="deviceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="last-updated">
+            <i class="fas fa-clock"></i> Last updated: <span id="lastUpdated">-</span>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwTiDXSQ9sHFnsNGZudsFVH3bKqGeAOHTSCQpfqGXT-FYp2zmYCcS0xYW3zJmmsgAg/exec";
+        let itChart, regionChart, branchChart, deviceChart;
+        let filterFrom = null;
+        let filterTo = null;
+        let allTickets = [];
+
+        async function fetchStats() {
+            try {
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                allTickets = data || [];
+
+                // Update summary cards
+                document.getElementById('totalTickets').textContent = allTickets.length;
+
+                // Calculate resolved tickets (assuming colI is status)
+                const closed = allTickets.filter(t => t.colI && t.colI.toLowerCase() === 'closed').length;
+                document.getElementById('resolvedTickets').textContent = closed;
+
+                // Calculate still open tickets
+                const open = allTickets.filter(t => t.colI && t.colI.toLowerCase() === 'open').length;
+                document.getElementById('stillOpenTickets').textContent = open;
+                // Count unique IT personnel
+                const itPersonnel = new Set(allTickets.map(t => t.colJ)).size;
+                document.getElementById('activeIT').textContent = itPersonnel;
+
+                // Populate IT dropdown
+                const itNames = [...new Set(allTickets.map(t => t.colJ || "Unassigned"))];
+                const itSelect = document.getElementById("itFilter");
+                itSelect.innerHTML = `<option value="all">All IT Personnel</option>`;
+                itNames.forEach(it => {
+                    const opt = document.createElement("option");
+                    opt.value = it;
+                    opt.textContent = it;
+                    itSelect.appendChild(opt);
+                });
+
+                // Populate Region dropdown
+                const regions = [...new Set(allTickets.map(t => t.colC || "Unknown"))];
+                const regionSelect = document.getElementById("regionFilter");
+                regionSelect.innerHTML = `<option value="all">All Regions</option>`;
+                regions.forEach(r => {
+                    const opt = document.createElement("option");
+                    opt.value = r;
+                    opt.textContent = r;
+                    regionSelect.appendChild(opt);
+                });
+
+                applyFilters();
+            } catch (err) {
+                console.error("Error fetching stats:", err);
+            }
+        }
+
+        function applyFilters() {
+            const today = new Date();
+            const itSelected = document.getElementById("itFilter").value;
+            const regionSelected = document.getElementById("regionFilter").value;
+
+            // Date filter
+            let filteredTickets = allTickets.filter(t => {
+                if (!t.colB) return false;
+                const ticketDate = new Date(t.colB);
+                if (filterFrom && ticketDate < filterFrom) return false;
+                if (filterTo && ticketDate > filterTo) return false;
+                return true;
+            });
+
+            // IT filter
+            if (itSelected !== "all") {
+                filteredTickets = filteredTickets.filter(t => (t.colJ || "Unassigned") === itSelected);
+            }
+
+            // Region filter
+            if (regionSelected !== "all") {
+                filteredTickets = filteredTickets.filter(t => (t.colC || "Unknown") === regionSelected);
+            }
+
+            // Update stat count
+            document.getElementById("totalTickets").textContent = filteredTickets.length;
+
+            updateCharts(filteredTickets);
+        }
+
+        function updateCharts(filteredTickets) {
+            const itCounts = {};
+            filteredTickets.forEach(t => {
+                const it = t.colJ || "Unassigned";
+                itCounts[it] = (itCounts[it] || 0) + 1;
+            });
+            updateChart(itChart, "itChart", Object.keys(itCounts), Object.values(itCounts), "Tickets", "#4361ee");
+
+            const regionCounts = {};
+            filteredTickets.forEach(t => {
+                const region = t.colC || "Unknown";
+                regionCounts[region] = (regionCounts[region] || 0) + 1;
+            });
+            updateChart(regionChart, "regionChart", Object.keys(regionCounts), Object.values(regionCounts), "Tickets", "#7209b7");
+
+            const deviceCounts = {};
+            filteredTickets.forEach(t => {
+                const device = t.colF || "Unknown";
+                deviceCounts[device] = (deviceCounts[device] || 0) + 1;
+            });
+            updateChart(deviceChart, "deviceChart", Object.keys(deviceCounts), Object.values(deviceCounts), "Tickets", "#f72585");
+
+            const branchCounts = {};
+            filteredTickets.forEach(t => {
+                const branch = t.colD || "Unknown";
+                branchCounts[branch] = (branchCounts[branch] || 0) + 1;
+            });
+            updateChart(branchChart, "branchChart", Object.keys(branchCounts), Object.values(branchCounts), "Tickets", "#4cc9f0");
+        }
+
+        function updateChart(chartRef, canvasId, labels, data, label, barColor) {
+            if (!chartRef) {
+                const ctx = document.getElementById(canvasId).getContext("2d");
+                chartRef = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            backgroundColor: barColor,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                font: { size: 16 }
+                            },
+                            datalabels: {
+                                color: "#333",      // text color
+                                anchor: "center",    // position inside bar
+                                align: "center",     // center align
+                                font: {
+                                    weight: "bold",
+                                    size: 12
+                                },
+                                formatter: (value) => value
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    color: '#333'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)',
+                                },
+                                ticks: {
+                                    color: '#333'
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]   // 🔹 activate plugin
+                });
+
+                if (canvasId === "itChart") itChart = chartRef;
+                if (canvasId === "regionChart") regionChart = chartRef;
+                if (canvasId === "deviceChart") deviceChart = chartRef;
+                if (canvasId === "branchChart") branchChart = chartRef;
+            } else {
+                chartRef.data.labels = labels;
+                chartRef.data.datasets[0].data = data;
+                chartRef.update();
+            }
+        }
+
+        function applyDateFilter() {
+            filterFrom = document.getElementById("dateFrom").value ? new Date(document.getElementById("dateFrom").value) : null;
+            filterTo = document.getElementById("dateTo").value ? new Date(document.getElementById("dateTo").value) : null;
+            if (filterTo) filterTo.setHours(23, 59, 59, 999);
+            applyFilters();
+        }
+
+        function resetDateFilter() {
+            document.getElementById("dateFrom").value = "";
+            document.getElementById("dateTo").value = "";
+            document.getElementById("regionFilter").value = "all";
+            document.getElementById("itFilter").value = "all";
+            filterFrom = null;
+            filterTo = null;
+            applyFilters();
+        }
+
+        // Event listeners
+        document.getElementById("dateFrom").addEventListener("change", applyDateFilter);
+        document.getElementById("dateTo").addEventListener("change", applyDateFilter);
+        document.getElementById("regionFilter").addEventListener("change", applyFilters);
+        document.getElementById("itFilter").addEventListener("change", applyFilters);
+
+        // Initialize
+        fetchStats();
+        setInterval(fetchStats, 300000); // Refresh every 5 minutes
+    </script>
+</body>
+
+</html>

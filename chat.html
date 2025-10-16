@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Staff Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand: #6d28d9;
+            --surface: #f8fafc;
+            --bg: #f1f5f9;
+            --text: #1e293b;
+            --muted: #64748b;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--surface);
+        }
+
+        #chat-box {
+            flex-grow: 1;
+            overflow-y: scroll;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .msg-bubble {
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            line-height: 1.4;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            /* More robust wrapping for long links */
+        }
+
+        .msg.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .msg.sent .msg-bubble {
+            background: var(--brand);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .msg.received .msg-bubble {
+            background: #e2e8f0;
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .username {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .msg.received .username {
+            color: var(--brand);
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        #input-area {
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            border-top: 1px solid #e2e8f0;
+            background: var(--surface);
+        }
+
+        #message {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border-radius: 25px;
+            border: 1px solid #cbd5e1;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #message:focus {
+            border-color: var(--brand);
+        }
+
+        #send {
+            background: var(--brand);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: background-color 0.2s, transform 0.15s, box-shadow 0.15s;
+            /* 3D Effect */
+            border-bottom: 4px solid #5a1db9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #send:hover {
+            background: #7e42f5;
+            /* Slightly lighter on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #send:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border-bottom-width: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div id="status"
+            style="padding:8px 12px; font-size:13px; color:var(--muted); border-top:1px solid #e2e8f0; display:flex; align-items:center; gap:8px; justify-content:space-between;">
+            <div style="flex:1">Status: <span id="status-text">Connecting...</span></div>
+            <div style="flex-shrink:0">
+                <button id="toggle-debug" title="Show debug log"
+                    style="background:transparent; border:1px solid #ddd; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px;">Show
+                    debug</button>
+            </div>
+        </div>
+        <pre id="debug-log" data-visible="false"
+            style="margin:0; padding:8px; height:90px; overflow:auto; font-size:12px; background:#ffffff; color:#0b1220; border-top:1px solid #e6eef8; display:none">Debug log:
+</pre>
+        <div id="chat-box">
+            <!-- Messages will be loaded here -->
+        </div>
+        <div id="input-area">
+            <input type="text" id="message" placeholder="Type a message..." autocomplete="off">
+            <button id="send" title="Send Message"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwTiDXSQ9sHFnsNGZudsFVH3bKqGeAOHTSCQpfqGXT-FYp2zmYCcS0xYW3zJmmsgAg/exec";
+        const getCurrentUser = () => {
+            try {
+                const sessionData = JSON.parse(localStorage.getItem('it_session') || '{}');
+                return sessionData.fullName || sessionData.username || "Anonymous";
+            } catch (e) {
+                console.error("Failed to get user for chat:", e);
+                return "Anonymous";
+            }
+        };
+        const currentUser = getCurrentUser();
+        let lastMessageTimestamp = null; // Track the last message
+        // Track messages we displayed optimistically so we can ignore the server echo
+        // pendingMessages entries: { text, iso, addedAt }
+        const pendingMessages = [];
+        // Generate a short client id
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        }
+        const PENDING_MATCH_WINDOW_MS = 15000; // 15s tolerance when matching by text+time
+        let isFetching = false; // Add a lock to prevent concurrent fetches
+
+        async function loadMessages(isInitialLoad = false) {
+            if (isFetching) {
+                debugLog('loadMessages -> skipped, already fetching');
+                return;
+            }
+            isFetching = true;
+            try {
+                let url = API_URL + "?action=getMessages";
+                if (lastMessageTimestamp && !isInitialLoad) {
+                    // Use ISO string for server compatibility
+                    url += "&since=" + new Date(lastMessageTimestamp).toISOString();
+                }
+                debugLog('loadMessages -> fetching: ' + url);
+                const res = await fetch(url, { cache: 'no-store' });
+                debugLog('loadMessages -> fetch resolved (status ' + res.status + ')');
+                const text = await res.text();
+                if (!res.ok) {
+                    console.error('HTTP error from loadMessages:', res.status, text);
+                    debugLog('loadMessages -> HTTP error ' + res.status);
+                    setStatus('Error: HTTP ' + res.status);
+                    return;
+                }
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Non-JSON response from loadMessages:', text);
+                    debugLog('loadMessages -> non-JSON response (first 400 chars):\n' + String(text || '').slice(0, 400).replace(/</g, '&lt;'));
+                    setStatus('Error: invalid response');
+                    return;
+                }
+                if (!data.success) {
+                    // Server responded but indicates failure — surface server message if present
+                    const serverMsg = data.message || data.error || 'server';
+                    debugLog('loadMessages -> server returned success=false; message: ' + String(serverMsg));
+                    setStatus('Error: ' + serverMsg);
+                    console.error('Server response success=false', data);
+                    return;
+                }
+                // Server responded successfully and we can consider ourselves connected
+                setStatus('Connected');
+
+                const chatBox = document.getElementById("chat-box");
+
+                // Get only the new messages since the last one we saw
+                const newMessages = data.messages || []; // Server already filters, so we just use the result.
+                if (newMessages.length === 0) {
+                    // No new messages, but API worked — keep status as Connected
+                    debugLog('loadMessages -> OK: no new messages');
+                    return;
+                }
+
+                const shouldScroll = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 30;
+
+                // On initial load, clear the box before adding messages
+                if (isInitialLoad) {
+                    chatBox.innerHTML = "";
+                }
+                // The server sends messages in chronological order, so no reverse is needed.
+                // If they appear newest-first, it's because of appendChild logic.
+                // Let's ensure they are sorted by date just in case.
+                // Build a quick set of existing message keys to avoid duplicates
+                const existingKeys = new Set(Array.from(chatBox.querySelectorAll('.msg')).map(n => n.getAttribute('data-msg-key')));
+
+                newMessages.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp)).forEach(m => {
+                    const isSent = m.Username === currentUser;
+                    const rawKey = (m.Username || '') + '::' + (m.Message || '') + '::' + (m.Timestamp || '');
+                    const encKey = encodeURIComponent(rawKey);
+
+                    // If this message came from us, first try to match it to a pending optimistic message
+                    if (isSent) {
+                        const serverIso = m.Timestamp ? new Date(m.Timestamp).toISOString() : null;
+                        let matchedIndex = -1;
+                        if (serverIso) {
+                            matchedIndex = pendingMessages.findIndex(p => p.iso === serverIso);
+                        }
+                        // Fallback: match by identical text and timestamp proximity (in case server adjusts ms)
+                        if (matchedIndex === -1) {
+                            matchedIndex = pendingMessages.findIndex(p => {
+                                try {
+                                    return p.text === (m.Message || '') && Math.abs(new Date(m.Timestamp).getTime() - new Date(p.iso).getTime()) < PENDING_MATCH_WINDOW_MS;
+                                } catch (e) {
+                                    return false;
+                                }
+                            });
+                        }
+
+                        if (matchedIndex !== -1) {
+                            // We already showed this message optimistically. Update its timestamp and stop.
+                            // Prefer matching the optimistic DOM element by clientId (which is stored in data-pending)
+                            const pendingEntry = pendingMessages[matchedIndex];
+                            // remove matched pending entry from the array (server canonicalized)
+                            pendingMessages.splice(matchedIndex, 1);
+                            const clientId = pendingEntry.clientId;
+                            const pendingIso = pendingEntry.iso;
+                            // try clientId first, then fall back to iso
+                            let pendingEl = null;
+                            if (clientId) pendingEl = chatBox.querySelector(`.msg[data-pending="${clientId}"]`);
+                            if (!pendingEl && pendingIso) pendingEl = chatBox.querySelector(`.msg[data-pending="${pendingIso}"]`);
+                            if (pendingEl) {
+                                // Remove pending marker and mark canonical key
+                                pendingEl.removeAttribute('data-pending');
+                                pendingEl.setAttribute('data-msg-key', encKey);
+                                existingKeys.add(encKey);
+                                const tsEl = pendingEl.querySelector('.timestamp');
+                                if (tsEl && m.Timestamp) tsEl.textContent = new Date(m.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' sent';
+                            }
+                            return; // skip adding duplicate
+                        }
+                        // As an extra safety: try DOM-based pending match by data-pending and identical bubble text
+                        try {
+                            const pendingEls = Array.from(chatBox.querySelectorAll('.msg[data-pending]'));
+                            const normalizedServerText = String(m.Message || '').trim();
+                            for (const el of pendingEls) {
+                                const bubble = el.querySelector('.msg-bubble');
+                                const bubbleText = bubble ? (bubble.innerText || '').trim() : '';
+                                if (bubbleText === normalizedServerText) {
+                                    // found match; convert pending element to canonical server key
+                                    const pendingIsoAttr = el.getAttribute('data-pending');
+                                    el.removeAttribute('data-pending');
+                                    el.setAttribute('data-msg-key', encKey);
+                                    existingKeys.add(encKey);
+                                    // remove from pendingMessages by iso or text
+                                    for (let i = pendingMessages.length - 1; i >= 0; i--) {
+                                        if (pendingMessages[i].clientId === pendingIsoAttr || pendingMessages[i].iso === pendingIsoAttr || pendingMessages[i].text === normalizedServerText) pendingMessages.splice(i, 1);
+                                    }
+                                    const tsEl2 = el.querySelector('.timestamp');
+                                    if (tsEl2 && m.Timestamp) tsEl2.textContent = new Date(m.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' sent';
+                                    return; // skip adding duplicate
+                                }
+                            }
+                        } catch (e) { /* ignore DOM match errors */ }
+                    }
+
+                    // Extra dedupe: if an element with the same encoded key already exists, skip
+                    if (existingKeys.has(encKey)) {
+                        debugLog('loadMessages -> skipping duplicate by key: ' + rawKey.slice(0, 200));
+                        return;
+                    }
+
+                    // DOM-based dedupe: find any optimistic element whose bubble text matches the server message
+                    // and which is still pending/sending; update it instead of appending a duplicate.
+                    try {
+                        const normalizedServerText = String(m.Message || '').trim();
+                        const possibleMatches = Array.from(chatBox.querySelectorAll('.msg'));
+                        for (const el of possibleMatches.reverse()) { // check newest-first
+                            const bubble = el.querySelector('.msg-bubble');
+                            const bubbleText = bubble ? (bubble.innerText || '').trim() : '';
+                            const hasPending = el.hasAttribute('data-pending');
+                            const isSending = (el.querySelector('.timestamp') || {}).textContent === 'sending...';
+                            const isMarkedSent = el.getAttribute('data-sent') === '1';
+                            if (bubbleText === normalizedServerText && (hasPending || isSending || isMarkedSent)) {
+                                // update this element to canonical server values
+                                el.removeAttribute('data-pending');
+                                el.setAttribute('data-msg-key', encKey);
+                                existingKeys.add(encKey);
+                                const ts = m.Timestamp ? new Date(m.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' sent' : '';
+                                const tsEl = el.querySelector('.timestamp');
+                                if (tsEl) tsEl.textContent = ts;
+                                // ensure class is 'sent'
+                                el.classList.remove('received');
+                                el.classList.add('sent');
+                                debugLog('loadMessages -> merged server message into existing optimistic element');
+                                return; // skip appending
+                            }
+                        }
+                    } catch (e) { /* ignore dedupe errors */ }
+
+                    const msgDiv = document.createElement("div");
+                    msgDiv.className = `msg ${isSent ? 'sent' : 'received'}`;
+                    const time = m.Timestamp ? new Date(m.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                    const messageText = m.Message || ''; // Ensure message is a string
+                    const linkedMessage = linkify(messageText);
+                    msgDiv.innerHTML = `
+                        <div class="msg-bubble">
+                            ${!isSent ? `<div class="username">${m.Username}</div>` : ''}
+                            ${messageText ? `<div>${linkedMessage}</div>` : ''}
+                        </div>
+                        <div class="timestamp">${time}</div>
+                    `;
+                    // Tag canonical key so future loads can dedupe
+                    msgDiv.setAttribute('data-msg-key', encKey);
+                    existingKeys.add(encKey);
+                    debugLog('loadMessages -> appending message: ' + rawKey.slice(0, 200));
+                    chatBox.appendChild(msgDiv);
+                });
+
+                // Notify parent of the number of *new messages received from others*
+                const newReceivedMessages = newMessages.filter(m => m.Username !== currentUser);
+                if (newReceivedMessages.length > 0) {
+                    window.parent.postMessage({ type: 'NEW_CHAT_MESSAGE', newMessagesCount: newReceivedMessages.length }, '*');
+                }
+
+                // Get the timestamp of the very last message received in this batch
+                const lastNewMessage = newMessages[newMessages.length - 1];
+                if (lastNewMessage && lastNewMessage.Timestamp) {
+                    lastMessageTimestamp = new Date(lastNewMessage.Timestamp).toISOString();
+                }
+                if (shouldScroll) chatBox.scrollTop = chatBox.scrollHeight;
+                setStatus('Connected');
+            } catch (error) {
+                console.error("Failed to load messages:", error);
+                debugLog('loadMessages -> exception: ' + (error && error.message ? error.message : String(error)));
+                setStatus('Error: ' + (error.message || error));
+            } finally {
+                isFetching = false; // Release the lock
+            }
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById("message");
+            const sendButton = document.getElementById("send");
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // --- Optimistic UI Update ---
+            // Add the message to the UI immediately for a faster feel.
+            const chatBox = document.getElementById("chat-box");
+            const clientTimestamp = new Date();
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `msg sent`;
+            // Mark this optimistic element with a client-generated token so we can match server echo
+            const clientId = generateId();
+            msgDiv.setAttribute('data-pending', clientId);
+            const time = 'sending...';
+            const linkedMessage = linkify(message);
+            msgDiv.innerHTML = `
+                <div class="msg-bubble">
+                    <div>${linkedMessage}</div>
+                </div>
+                <div class="timestamp">${time}</div>
+            `;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the new message
+            // Record as pending so loadMessages can ignore the server echo
+            // store both clientId and iso (iso is server timestamp candidate later)
+            pendingMessages.push({ text: message, iso: clientTimestamp.toISOString(), clientId: clientId, addedAt: Date.now() });
+            messageInput.value = ""; // Clear the input box right away
+            // --- End Optimistic UI Update ---
+
+            const originalButtonContent = sendButton.innerHTML;
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            sendButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+
+            const bodyParams = new URLSearchParams();
+            bodyParams.append('action', 'postMessage');
+            bodyParams.append('username', currentUser);
+            bodyParams.append('message', message);
+            const timestamp = new Date();
+            bodyParams.append('timestamp', timestamp.toISOString());
+
+            try {
+                debugLog('sendMessage -> posting to ' + API_URL + ' body: ' + bodyParams.toString());
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: bodyParams
+                });
+                debugLog('sendMessage -> response status ' + response.status);
+                const text = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    console.error('Non-JSON response from sendMessage:', text);
+                    debugLog('sendMessage -> non-JSON response (first 400 chars):\n' + String(text || '').slice(0, 400).replace(/</g, '&lt;'));
+                    setStatus('Error: send failed (invalid response)');
+                    throw e;
+                }
+
+                if (result.success) {
+                    // The message is already displayed optimistically. The polling will handle syncing.
+                    debugLog('sendMessage -> server OK');
+                    try {
+                        // Find recent pending messages that match this text and mark them as sent for quicker UI feedback
+                        // Do NOT remove the data-pending attribute here — keep it so the polling reconciliation can match
+                        const recentPending = pendingMessages.filter(p => p.text === message);
+                        for (const p of recentPending) {
+                            const pendingEl = document.querySelector(`.msg[data-pending="${p.clientId}"]`);
+                            if (pendingEl) {
+                                const tsEl = pendingEl.querySelector('.timestamp');
+                                if (tsEl) {
+                                    // Use the client timestamp as a reasonable display time until server echo arrives
+                                    try {
+                                        const clientTime = new Date(p.iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                        tsEl.textContent = clientTime + ' sent';
+                                    } catch (e) {
+                                        tsEl.textContent = 'sent';
+                                    }
+                                }
+                                // mark visually as sent but keep data-pending so loadMessages can canonicalize
+                                pendingEl.setAttribute('data-sent', '1');
+                            }
+                        }
+                    } catch (e) { /* non-fatal UI update failure */ }
+                } else {
+                    const serverMsg = result.message || result.error || 'Failed to send message';
+                    debugLog('sendMessage -> server returned success=false; message: ' + String(serverMsg));
+                    setStatus('Error: ' + serverMsg);
+                    throw new Error(serverMsg);
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+                debugLog('sendMessage -> exception: ' + (error && error.message ? error.message : String(error)));
+                setStatus('Error: send failed');
+            } finally {
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                sendButton.innerHTML = originalButtonContent;
+                messageInput.focus();
+                // Cleanup stale pending entries (older than our match window)
+                const now = Date.now();
+                for (let i = pendingMessages.length - 1; i >= 0; i--) {
+                    if (now - pendingMessages[i].addedAt > PENDING_MATCH_WINDOW_MS) pendingMessages.splice(i, 1);
+                }
+            }
+        }
+
+        function debugLog(msg) {
+            try {
+                const el = document.getElementById('debug-log');
+                const t = new Date().toLocaleTimeString();
+                // Only append to the visible debug area to avoid hidden accumulation
+                if (el && el.getAttribute('data-visible') === 'true') {
+                    el.textContent = el.textContent + '\n[' + t + '] ' + msg;
+                    el.scrollTop = el.scrollHeight;
+                }
+                // Always output to console for convenience
+                console.log('[DEBUG]', msg);
+            } catch (e) {
+                console.log('[DEBUG] failed to write debug log', e);
+            }
+        }
+
+        // Debug toggle wiring
+        (function () {
+            const toggle = document.getElementById('toggle-debug');
+            const debugEl = document.getElementById('debug-log');
+            function setVisible(v) {
+                if (!debugEl || !toggle) return;
+                if (v) {
+                    debugEl.style.display = '';
+                    debugEl.setAttribute('data-visible', 'true');
+                    toggle.textContent = 'Hide debug';
+                    toggle.title = 'Hide debug log';
+                } else {
+                    debugEl.style.display = 'none';
+                    debugEl.setAttribute('data-visible', 'false');
+                    toggle.textContent = 'Show debug';
+                    toggle.title = 'Show debug log';
+                }
+                try { localStorage.setItem('chat_debug_visible', v ? '1' : '0'); } catch (e) { }
+            }
+            if (toggle) {
+                toggle.addEventListener('click', () => {
+                    const currently = debugEl && debugEl.getAttribute('data-visible') === 'true';
+                    setVisible(!currently);
+                });
+            }
+            // Restore preference
+            try {
+                const pref = localStorage.getItem('chat_debug_visible');
+                setVisible(pref === '1');
+            } catch (e) { /* ignore */ }
+        })();
+
+        function linkify(text) {
+            // Ensure we always operate on a string (some values from the sheet may be non-strings)
+            text = String(text || '');
+            const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\bwww\.[-A-Z0-9+&@#\/%%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+            return text.replace(urlRegex, function (url, urlWithProto, wwwUrl) {
+                let fullUrl = url;
+                if (wwwUrl) {
+                    fullUrl = 'http://' + wwwUrl;
+                }
+                // The inline style ensures the link color matches the bubble color, but remains underlined.
+                return `<a href="${fullUrl}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
+            });
+        }
+
+        document.getElementById("send").addEventListener("click", sendMessage);
+        // Use keydown to reliably capture Enter (and avoid IME/keypress issues)
+        document.getElementById("message").addEventListener("keydown", function (event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function setStatus(text) {
+            const el = document.getElementById('status-text');
+            if (el) el.textContent = text;
+        }
+
+        // Initial full load
+        (async () => {
+            const chatBox = document.getElementById("chat-box");
+            setStatus('Connecting...');
+            await loadMessages(true); // Perform initial full load, which will set the lastMessageTimestamp
+            setInterval(loadMessages, 1500); // Start polling for new messages
+        })();
+    </script>
+</body>
+
+</html>
